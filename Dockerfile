@@ -4,6 +4,8 @@ FROM golang:1.27.3-alpine AS builder
 RUN apk add --no-cache git
 
 WORKDIR /src
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GOSUMDB=off
 
 # Cache dependencies
 COPY server/go.mod server/go.sum ./server/
