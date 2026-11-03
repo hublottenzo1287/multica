@@ -21,7 +21,9 @@ dc() { docker compose -p "$PROJECT" "${COMPOSE_FILES[@]}" "$@"; }
 die() { echo "✗ $*" >&2; exit 1; }
 
 [ -d .git ] || die "当前目录不是 git checkout，无法自动拉取升级；请手动更新源码后用 install.sh 重跑"
-[ -z "$(git status --porcelain)" ] || die "工作区有未提交改动，先处理（commit/stash）再升级，避免拉取冲突"
+# 只拦已跟踪文件的改动：backups/、.env 等部署产物是未跟踪文件，不应挡住升级
+# （首版没区分，实测中被自己生成的 backups/ 挡下——已修正）
+[ -z "$(git status --porcelain --untracked-files=no)" ] || die "工作区有未提交的源码改动，先处理（commit/stash）再升级，避免拉取冲突"
 OLD=$(git rev-parse --short HEAD)
 BRANCH=${BRANCH:-$(git rev-parse --abbrev-ref HEAD)}
 
