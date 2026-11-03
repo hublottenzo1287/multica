@@ -51,8 +51,8 @@ docker info >/dev/null 2>&1 || die "Docker 守护进程未运行或当前用户�
 # 阶段 2 教训：构建缓存先进临时目录，/tmp 太小会报出与主盘无关的假象错误
 TMP_FREE_MB=$(df -Pm /tmp | awk 'NR==2 {print $4}')
 [ "${TMP_FREE_MB:-0}" -ge 5120 ] || echo "⚠ /tmp 可用空间 ${TMP_FREE_MB}MB < 5GB：Docker 构建一般不受影响，但本机本地构建（Go 等）会踩坑，建议清理或扩容"
-DISK_FREE_GB=$(df -PG . | awk 'NR==2 {print $4}')
-[ "${DISK_FREE_GB:-0}" -ge 10 ] || die "安装目录可用空间不足 10GB（当前 ${DISK_FREE_GB}GB）"
+DISK_FREE_MB=$(df -Pm . | awk 'NR==2 {print $4}')
+[ "${DISK_FREE_MB:-0}" -ge 10240 ] || die "安装目录可用空间不足 10GB（当前约 $(( ${DISK_FREE_MB:-0} / 1024 ))GB）"
 MEM_GB=$(awk '/MemTotal/ {printf "%d", $2/1024/1024}' /proc/meminfo)
 [ "${MEM_GB:-0}" -ge 4 ] || echo "⚠ 内存 ${MEM_GB}GB < 4GB：前端构建可能吃紧，建议 8GB 以上"
 
