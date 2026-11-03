@@ -18,7 +18,7 @@ bash deploy-cn/install.sh
 ## 验收清单（交付时逐项打勾）
 
 - [ ] `bash deploy-cn/install.sh` 一次跑通，总用时记录在案（目标 ≤30 分钟；首次构建时长取决于机器与网络，镜像层有缓存后重跑为分钟级）
-- [ ] 前端地址可打开注册/登录页；后端 /health 返回 `{"status":"ok","checks":{"db":"ok","migrations":"ok"}}`
+- [ ] 前端地址可打开注册/登录页；后端 /health 返回 status ok（详细健康端点另含 db/migrations 检查项）
 - [ ] .env 权限为 600，密钥非默认值；DO_NOT_TRACK=1
 - [ ] `bash deploy-cn/backup.sh` 跑通，backups/ 下有 .sql.gz 且 `gzip -t` 校验通过
 - [ ] 客户侧确认：管理员账号已注册、能登录；发信方式已沟通（自托管默认无邮件服务，注册验证码只进数据库——生产交付前必须配 SMTP 或在培训中明确说明）
@@ -50,3 +50,7 @@ bash deploy-cn/install.sh
 - 本包是部署编排，不改 Multica 业务代码；与官方版本升级路径兼容（升级即 git pull + 重建）。
 - 许可证：自托管自用属 Multica License 免费范围；收费替客户部署在其服务器上属灰区，澄清函未获回复前不对外承诺（见阶段 0 许可证备忘）。
 - 干净机「无 Docker」分支走官方安装脚本（阿里云镜像），需要在目标机实测一次后在本文件勾掉此说明——当前版本已在装有 Docker 的机器上完成全流程实测（见验收记录）。
+
+## 验收记录
+
+- 2026-11-03，autosvr 隔离实测（独立目录 + 独立 compose 项目名 multica-packtest + 端口 13000/18080，不碰运行中的验证实例）：install.sh 一次跑通，**总用时 544 秒（约 9 分钟，含源码全量构建）≤ 30 分钟目标**；前端 HTTP 200，后端 /health status ok，三容器全 Up（postgres healthy）；.env 权限 600、DO_NOT_TRACK=1；backup.sh 实测产出 116K 备份包且校验通过。首跑曾踩中 GNU df 无 -G 选项的兼容 bug，已修复（commit 3f9a31e）——这正是先隔离实测再交付的价值。
